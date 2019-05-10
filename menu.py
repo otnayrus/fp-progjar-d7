@@ -19,7 +19,7 @@ pygame.display.set_caption("Werewolf")
 clock = pygame.time.Clock()
 
 def logo(x,y):
-	logo = pygame.image.load('ww_logo.png')
+	logo = pygame.image.load('img/ww_logo.png')
 	gameDisplay.blit(logo,(x,y))
 
 def text_objects(text,font,color):
