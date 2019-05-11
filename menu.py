@@ -47,6 +47,12 @@ def draw_button(text,text_size,font,font_color,x,y,width,height,color1,color2,ac
 	createText(text,font,text_size,font_color,(x+(width/2)),(y+(height/2)))
 
 def quitgame():
+	global create_room
+	global intro
+	global join_room
+	join_room = False
+	intro = False
+	create_room=False
 	pygame.quit()
 	quit()
 
@@ -65,70 +71,101 @@ def game_intro():
 		mouse = pygame.mouse.get_pos()
 		# print mouse
 		draw_button("Create Room",20,"freesansbold.ttf",white,100,450,150,100,green,bright_green,create_room)
-		draw_button("Join Room",20,"freesansbold.ttf",white,550,450,150,100,dark_blue,bright_blue,None)
+		draw_button("Join Room",20,"freesansbold.ttf",white,550,450,150,100,dark_blue,bright_blue,join_room)
 		pygame.display.update()
 		clock.tick(60)
 	pygame.display.update()
 
-def form(width,height,x,y,color1,color2,font,font_size,events):
-	text = ''
+def form(index,a,b,c,d,color1,color2,font,font_size,font_color,events):
+	global text
+	global active
 	global create_room
+	global color
 	fonts = pygame.font.Font(font, font_size)
-	input_box = pygame.Rect(x,y,width,height)
-	color = color1
-
+	input_box = pygame.Rect(a,b,c,d)
+	# pygame.Rect.Rect(left, top, width, height)
 
 	for event in events:
 		print event
 		if event.type == pygame.QUIT:
-			create_room = False
+			quitgame()
 		if event.type == pygame.MOUSEBUTTONDOWN:
-			if input_box.collidepoint(event.pos):
-				print "masuk"
-				active = not active
+			if input_box.collidepoint(event.pos):			
+				active[index] = not active[index]
 			else :
-				active = False
-			color = color1 if active else color2
+				active[index] = False
+			color[index] = color1 if active[index] else color2
 
 		if event.type == pygame.KEYDOWN:
 			# print "benar"
-
-			if active==False:
-				if event.type == pygame.K_RETURN:
-					print(text)
-					text = ''
-				elif event.type == pygame.K_BACKSPACE:
-					text = text[:-1]
+			if active[index]:
+				if event.unicode == '\r':
+					print text[index]
+					text[index] = ''
+				elif event.unicode == '\x08':
+					text[index] = text[index][:-1]
 				else:
-					text += event.unicode
+					text[index] += event.unicode
 
-	txt_surface = fonts.render(text, True, white)
-	# Resize the box if the text is too long.
-	width = max(width, txt_surface.get_width()+10)
-	input_box.w = width
-	# Blit the text.
+	txt_surface = fonts.render(text[index], True, font_color)
+	# Resize the box if the text[index] is too long.
+	a = max(a, txt_surface.get_width()+10)
+	input_box.w = a
+	# Blit the text[index].
 	gameDisplay.blit(txt_surface, (input_box.x+5, input_box.y+5))
 	# Blit the input_box rect.
-	pygame.draw.rect(gameDisplay, color, input_box, 2)
+	pygame.draw.rect(gameDisplay, color[index], input_box,2)
 	pygame.display.update()
 
 
 def create_room():
 	global intro
 	global create_room
+	global text
+	global active
+	global color
+	active = [False,False,False]
+	text = ['','','']
+	color =[0,0,0]
 	intro = False
 	create_room = True
 	gameDisplay.fill(black)
-	active = False
 
 	while create_room :
 		gameDisplay.fill((30,30,30))
 		# for event in pygame.event.get():
 		# 	if event.type == pygame.QUIT:
 		# 		create_room = False
-		# createText("Insert Room Code","freesansbold.ttf",50,white,display_width/2,display_height*0.1)
-		form(200,100,140,32,pygame.Color('lightskyblue3'),pygame.Color('dodgerblue2'),None,32,pygame.event.get())
-	
+		createText("Name.CreateRoomCode","freesansbold.ttf",50,white,display_width/2,display_height*0.4)
+		form(0,(display_width/2)-150,(display_height*0.5),150,50,pygame.Color('lightskyblue3'),pygame.Color('dodgerblue2'),None,32,white,pygame.event.get())
+		# createText("Insert Room Code","freesansbold.ttf",50,white,display_width*0.5,display_height*0.5)
+		# form(1,(display_width*0.5)-150,200,150,32,pygame.Color('lightskyblue3'),pygame.Color('dodgerblue2'),None,32,pygame.event.get())
+		# print(event)
+		pygame.display.update()
+		clock.tick(30)
+
+def join_room():
+	global intro
+	global create_room
+	global text
+	global active
+	global color
+	active = [False,False,False]
+	text = ['','','']
+	color =[0,0,0]
+	intro = False
+	join_room = True
+	gameDisplay.fill(black)
+
+	while join_room :
+		gameDisplay.fill((30,30,30))
+		# for event in pygame.event.get():
+		# 	if event.type == pygame.QUIT:
+		# 		join_room = False
+		createText("Name.JoinRoomCode","freesansbold.ttf",50,white,display_width/2,display_height*0.4)
+		form(0,(display_width/2)-150,(display_height*0.5),150,50,pygame.Color('lightskyblue3'),pygame.Color('dodgerblue2'),None,32,white,pygame.event.get())
+		# createText("Insert Room Code","freesansbold.ttf",50,white,display_width*0.5,display_height*0.5)
+		# form(1,(display_width*0.5)-150,200,150,32,pygame.Color('lightskyblue3'),pygame.Color('dodgerblue2'),None,32,pygame.event.get())
 		# print(event)
 		pygame.display.update()
 		clock.tick(30)
@@ -186,5 +223,6 @@ def try_room():
 
 
 # try_room()
-create_room()
+# create_room()
+game_intro()
 pygame.quit()			
