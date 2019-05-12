@@ -1,4 +1,5 @@
 import pygame
+import threading
 
 pygame.init()
 
@@ -19,8 +20,8 @@ gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption("Werewolf")
 clock = pygame.time.Clock()
 
-def logo(x,y):
-	logo = pygame.image.load('img/ww_logo.png')
+def load_image(x,y,name):
+	logo = pygame.image.load(name)
 	gameDisplay.blit(logo,(x,y))
 
 def text_objects(text,font,color):
@@ -61,7 +62,7 @@ def game_intro():
 	global intro
 	intro = True
 	gameDisplay.fill(white)
-	logo(display_width*0.35,display_height*0.20)
+	load_image(display_width*0.35,display_height*0.20,"img/ww_logo.png")
 	createText("Werewolf with chat and socket","freesansbold.ttf",50,black,display_width/2,display_height*0.1)
 	while intro :
 		for event in pygame.event.get():
@@ -134,30 +135,62 @@ def your_name():
 
 		createText("Your Name","freesansbold.ttf",50,white,display_width/2,display_height*0.4)
 		events=pygame.event.get()
-		form(0,(display_width/2)-150,(display_height*0.5),150,50,pygame.Color('lightskyblue3'),pygame.Color('dodgerblue2'),None,32,white,events,chat_room)
+		form(0,(display_width*0.338),(display_height*0.5),150,50,pygame.Color('lightskyblue3'),pygame.Color('dodgerblue2'),None,32,white,events,wait_room)
 		# form(1,(display_width/2)-150,(display_height*0.8),150,50,pygame.Color('lightskyblue3'),pygame.Color('dodgerblue2'),None,32,white,events)
 		pygame.display.update()
 		clock.tick(50)
 
-# def join_room():
-# 	global intro
-# 	global create_room
-# 	global text
-# 	global active
-# 	global color
-# 	active = [False,False,False]
-# 	text = ['','','']
-# 	color =[0,0,0]
-# 	intro = False
-# 	join_room = True
-# 	gameDisplay.fill(black)
+def wait_room():
+	global wait_room
+	players = ["player a","player b","player c"]
+	wait_room = True
+	while wait_room:
+		gameDisplay.fill((30, 30, 30))
+		height_p = 120
+		
+		createText("Waiting Room","freesansbold.ttf",50,white,display_width/2,display_height*0.1)
+		for player in players: 		
+			createText(player,"freesansbold.ttf",50,white,120,height_p)
+			height_p = height_p +50
 
-# 	while join_room :
-# 		gameDisplay.fill((30,30,30))
-# 		createText("Name.JoinRoomCode","freesansbold.ttf",50,white,display_width/2,display_height*0.4)
-# 		form(0,(display_width/2)-150,(display_height*0.5),150,50,pygame.Color('lightskyblue3'),pygame.Color('dodgerblue2'),None,32,white,pygame.event.get())
-# 		pygame.display.update()
-# 		clock.tick(30)
+		draw_button("Start",20,"freesansbold.ttf",white,(display_width*0.5)-75,(display_height*0.75),150,100,black,dark_gray,your_role)
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				quitgame()
+		pygame.display.update()
+		clock.tick(30)
+
+def your_role():
+	global your_role
+	your_role = True
+	while your_role:
+		gameDisplay.fill((30, 30, 30))
+		createText("You are a","freesansbold.ttf",50,white,display_width/2,display_height*0.1)
+		load_image(display_width*0.35,display_height*0.20,"img/ww_logo.png")
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				quitgame()
+		pygame.display.update()
+		clock.tick(30)
+
+def event_vote():
+	global event_vote
+	players = ["player a","player b","player c"]
+	event_vote = True
+	while event_vote:
+		height_p = 120
+		gameDisplay.fill((30, 30, 30))
+		createText("VOTE","freesansbold.ttf",50,white,display_width/2,display_height*0.1)
+		for player in players: 
+			draw_button(player,20,"freesansbold.ttf",white,50,height_p,100,50,dark_blue,bright_blue,None)
+			height_p = height_p + 60
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				quitgame()
+		pygame.display.update()
+		clock.tick(30)
+
+
 
 def chat_room():
 	global chat_room
@@ -171,8 +204,13 @@ def chat_room():
 	active = False
 	text = ''
 	chat_room = True
-
+	time = 30
 	while chat_room:
+		gameDisplay.fill((30, 30, 30))
+		createText("Discussion Time","freesansbold.ttf",50,white,display_width/2,display_height*0.1)
+		# createText(str(time),"freesansbold.ttf",50,white,display_width/2,display_height*0.2)
+		# time = time-1
+
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				quitgame()
@@ -194,7 +232,6 @@ def chat_room():
 					else:
 						text += event.unicode
 
-		gameDisplay.fill((30, 30, 30))
 		txt_surface = font.render(text, True, color)
 		width = max(200, txt_surface.get_width()+10)
 		input_box.w = width
@@ -202,6 +239,7 @@ def chat_room():
 		pygame.draw.rect(gameDisplay, color, input_box, 2)
 		pygame.display.update()
 		clock.tick(30)
+		
 
 
 game_intro()
