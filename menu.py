@@ -35,6 +35,16 @@ def createText(text,font,size,color,x,y):
 	gameDisplay.blit(TextSurf,TextRect)
 	pygame.display.update()
 
+def chatText(text,font,size,color,x,y):
+	largeText = pygame.font.Font(font, size)
+	TextSurf, TextRect = text_objects(text,largeText,color)
+	TextRect.left=x
+	TextRect.top=y
+
+	gameDisplay.blit(TextSurf,TextRect)
+	pygame.display.update()
+
+
 def draw_button(text,text_size,font,font_color,x,y,width,height,color1,color2,action=None):
 	mouse = pygame.mouse.get_pos()
 	click = pygame.mouse.get_pressed()
@@ -194,7 +204,7 @@ def event_vote():
 
 def chat_room():
 	global chat_room
-	chat = []
+	chats = []
 	font = pygame.font.Font(None, 32)
 	clock = pygame.time.Clock()
 	input_box = pygame.Rect(50, 550, 240, 32)
@@ -206,8 +216,12 @@ def chat_room():
 	chat_room = True
 	time = 30
 	while chat_room:
+		height_chat = 500
 		gameDisplay.fill((30, 30, 30))
 		createText("Discussion Time","freesansbold.ttf",50,white,display_width/2,display_height*0.1)
+		for chat in reversed(chats):
+			chatText(chat,"freesansbold.ttf",20,white,50,height_chat)
+			height_chat=height_chat-20
 		# createText(str(time),"freesansbold.ttf",50,white,display_width/2,display_height*0.2)
 		# time = time-1
 
@@ -224,8 +238,8 @@ def chat_room():
 				if active:
 					if event.key == pygame.K_RETURN:
 						print(text)
-						chat.append(str(text))
-						print chat
+						chats.append(str(text))
+						print chats
 						text = ''
 					elif event.key == pygame.K_BACKSPACE:
 						text = text[:-1]
@@ -241,6 +255,6 @@ def chat_room():
 		clock.tick(30)
 		
 
-
-game_intro()
+chat_room()
+# game_intro()
 pygame.quit()			
