@@ -6,6 +6,7 @@ display_width = 800
 display_height = 600
 
 black = (0,0,0)
+dark_gray = (50,50,50)
 white = (255,255,255)
 red = (255,0,0)
 green = (0,200,0)
@@ -29,7 +30,6 @@ def text_objects(text,font,color):
 def createText(text,font,size,color,x,y):
 	largeText = pygame.font.Font(font, size)
 	TextSurf, TextRect = text_objects(text,largeText,color)
-	# print "anjaaay : "+repr(TextRect.center)
 	TextRect.center=x,y
 	gameDisplay.blit(TextSurf,TextRect)
 	pygame.display.update()
@@ -69,14 +69,13 @@ def game_intro():
 				intro = False 
 			print(event)
 		mouse = pygame.mouse.get_pos()
-		# print mouse
-		draw_button("Create Room",20,"freesansbold.ttf",white,100,450,150,100,green,bright_green,create_room)
-		draw_button("Join Room",20,"freesansbold.ttf",white,550,450,150,100,dark_blue,bright_blue,join_room)
+		draw_button("PLAY",20,"freesansbold.ttf",white,(display_width*0.5)-75,(display_height*0.75),150,100,black,dark_gray,your_name)
+		# draw_button("Join Room",20,"freesansbold.ttf",white,550,450,150,100,dark_blue,bright_blue,join_room)
 		pygame.display.update()
 		clock.tick(60)
 	pygame.display.update()
 
-def form(index,a,b,c,d,color1,color2,font,font_size,font_color,events):
+def form(index,a,b,c,d,color1,color2,font,font_size,font_color,events,action=None):
 	global text
 	global active
 	global create_room
@@ -102,23 +101,22 @@ def form(index,a,b,c,d,color1,color2,font,font_size,font_color,events):
 				if event.unicode == '\r':
 					print text[index]
 					text[index] = ''
+					if action is not None:
+						action()
 				elif event.unicode == '\x08':
 					text[index] = text[index][:-1]
 				else:
 					text[index] += event.unicode
 
 	txt_surface = fonts.render(text[index], True, font_color)
-	# Resize the box if the text[index] is too long.
 	a = max(a, txt_surface.get_width()+10)
 	input_box.w = a
-	# Blit the text[index].
 	gameDisplay.blit(txt_surface, (input_box.x+5, input_box.y+5))
-	# Blit the input_box rect.
 	pygame.draw.rect(gameDisplay, color[index], input_box,2)
 	pygame.display.update()
 
 
-def create_room():
+def your_name():
 	global intro
 	global create_room
 	global text
@@ -133,96 +131,78 @@ def create_room():
 
 	while create_room :
 		gameDisplay.fill((30,30,30))
-		# for event in pygame.event.get():
-		# 	if event.type == pygame.QUIT:
-		# 		create_room = False
-		createText("Name.CreateRoomCode","freesansbold.ttf",50,white,display_width/2,display_height*0.4)
-		form(0,(display_width/2)-150,(display_height*0.5),150,50,pygame.Color('lightskyblue3'),pygame.Color('dodgerblue2'),None,32,white,pygame.event.get())
-		# createText("Insert Room Code","freesansbold.ttf",50,white,display_width*0.5,display_height*0.5)
-		# form(1,(display_width*0.5)-150,200,150,32,pygame.Color('lightskyblue3'),pygame.Color('dodgerblue2'),None,32,pygame.event.get())
-		# print(event)
+
+		createText("Your Name","freesansbold.ttf",50,white,display_width/2,display_height*0.4)
+		events=pygame.event.get()
+		form(0,(display_width/2)-150,(display_height*0.5),150,50,pygame.Color('lightskyblue3'),pygame.Color('dodgerblue2'),None,32,white,events,chat_room)
+		# form(1,(display_width/2)-150,(display_height*0.8),150,50,pygame.Color('lightskyblue3'),pygame.Color('dodgerblue2'),None,32,white,events)
 		pygame.display.update()
-		clock.tick(30)
+		clock.tick(50)
 
-def join_room():
-	global intro
-	global create_room
-	global text
-	global active
-	global color
-	active = [False,False,False]
-	text = ['','','']
-	color =[0,0,0]
-	intro = False
-	join_room = True
-	gameDisplay.fill(black)
+# def join_room():
+# 	global intro
+# 	global create_room
+# 	global text
+# 	global active
+# 	global color
+# 	active = [False,False,False]
+# 	text = ['','','']
+# 	color =[0,0,0]
+# 	intro = False
+# 	join_room = True
+# 	gameDisplay.fill(black)
 
-	while join_room :
-		gameDisplay.fill((30,30,30))
-		# for event in pygame.event.get():
-		# 	if event.type == pygame.QUIT:
-		# 		join_room = False
-		createText("Name.JoinRoomCode","freesansbold.ttf",50,white,display_width/2,display_height*0.4)
-		form(0,(display_width/2)-150,(display_height*0.5),150,50,pygame.Color('lightskyblue3'),pygame.Color('dodgerblue2'),None,32,white,pygame.event.get())
-		# createText("Insert Room Code","freesansbold.ttf",50,white,display_width*0.5,display_height*0.5)
-		# form(1,(display_width*0.5)-150,200,150,32,pygame.Color('lightskyblue3'),pygame.Color('dodgerblue2'),None,32,pygame.event.get())
-		# print(event)
-		pygame.display.update()
-		clock.tick(30)
+# 	while join_room :
+# 		gameDisplay.fill((30,30,30))
+# 		createText("Name.JoinRoomCode","freesansbold.ttf",50,white,display_width/2,display_height*0.4)
+# 		form(0,(display_width/2)-150,(display_height*0.5),150,50,pygame.Color('lightskyblue3'),pygame.Color('dodgerblue2'),None,32,white,pygame.event.get())
+# 		pygame.display.update()
+# 		clock.tick(30)
 
-def try_room():
+def chat_room():
+	global chat_room
+	chat = []
 	font = pygame.font.Font(None, 32)
 	clock = pygame.time.Clock()
-	input_box = pygame.Rect(200, 100, 140, 32)
+	input_box = pygame.Rect(50, 550, 240, 32)
 	color_inactive = pygame.Color('lightskyblue3')
 	color_active = pygame.Color('dodgerblue2')
 	color = color_inactive
 	active = False
 	text = ''
-	create_room = False
+	chat_room = True
 
-	while not create_room:
+	while chat_room:
 		for event in pygame.event.get():
-			print event
 			if event.type == pygame.QUIT:
-				create_room = True
+				quitgame()
 			if event.type == pygame.MOUSEBUTTONDOWN:
-				# If the user clicked on the input_box rect.
 				if input_box.collidepoint(event.pos):
-					# Toggle the active variable.
 					active = not active
 				else:
 					active = False
-				# Change the current color of the input box.
 				color = color_active if active else color_inactive
 			if event.type == pygame.KEYDOWN:
 				if active:
 					if event.key == pygame.K_RETURN:
 						print(text)
+						chat.append(str(text))
+						print chat
 						text = ''
 					elif event.key == pygame.K_BACKSPACE:
 						text = text[:-1]
 					else:
 						text += event.unicode
 
-		gameDisplay.fill(black)
-		createText("Insert Room Code","freesansbold.ttf",50,white,display_width/2,display_height*0.1)
-
-		# Render the current text.
+		gameDisplay.fill((30, 30, 30))
 		txt_surface = font.render(text, True, color)
-		# Resize the box if the text is too long.
 		width = max(200, txt_surface.get_width()+10)
 		input_box.w = width
-		# Blit the text.
 		gameDisplay.blit(txt_surface, (input_box.x+5, input_box.y+5))
-		# Blit the input_box rect.
 		pygame.draw.rect(gameDisplay, color, input_box, 2)
 		pygame.display.update()
-		# pygame.display.flip()
 		clock.tick(30)
 
 
-# try_room()
-# create_room()
 game_intro()
 pygame.quit()			
