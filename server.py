@@ -6,6 +6,8 @@ from thread import *
 import marshal
 import random
 
+# -- Main
+
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
@@ -18,26 +20,31 @@ list_of_clients = ['']  # Berisi IP dan Port Klien mulai dari index 1
 roles = ['']  # Berisi Role dari Klien mulai dari index 1
 client_names = ['']  # Berisi Nama Klien mulai dari index 1
 tally = [0, 0, 0, 0, 0, 0, 0, 0, 0] # Index ke-0 tidak dipakai 
+number_of_player = 8 # by default
 start_game = False
 
 list_of_sides = ["villager", "werewolf", "villager", "seer", "villager", "werewolf", "villager", "villager"] 
 
 # Loading players
-while not start_game:
+while number_of_player > 0:
     conn, addr = server.accept()
     list_of_clients.append(conn)
     print(str(addr) + " connected")
     start_new_thread(clientthread, (conn, addr))
+    number_of_player -= 1
 
+ingame = True
 werewolfGame()
-conn.close()
 server.close()
 
+# -- End of main ----------------------------------------------
 
+
+# --- Functions and Utilities ---
 # Game mechanism here
 def werewolfGame():
     roleRandomizer()
-    while True:
+    while ingame:
         # Afternoon Phase
         broadcast("afternoon", "Village at a Day, you are headed to the assembly.", '')
         time.sleep(60)
@@ -49,7 +56,7 @@ def werewolfGame():
         broadcast("night", "The darkness comes, you are in your home with candle lights.", '')
         time.sleep(20)
         revise("werewolf vote")
-    return
+    endgame()
         
 
 def revise(arg):
@@ -57,22 +64,32 @@ def revise(arg):
         chosen = [i for i, x in enumerate(tally) if x == max(tally)]
         if len(chosen) == 1:
             # Execute and reveal
+            broadcast("execute", "The Village executed " + str(client_names[chosen]) + 
+                "Turns out " + str(chosen) + " is a " + str(roles[chosen]), '')
+            to_client("killed", "You have been slain. Thanks for playing.",list_of_clients[chosen])
             roles[chosen] = "Ded"
-            broadcast("execute", "REVEAL message", '') # To do <<<
+            
     elif arg.startswith('w'):
         chosen = [i for i, x in enumerate(tally) if x == max(tally)]
         if len(chosen) == 1:
             # Execute and reveal
+            broadcast("execute", "The Werewolves kills " + str(client_names[chosen]) + 
+                "Turns out " + str(chosen) + " is a " + str(roles[chosen]), '')
+            to_client("killed", "You have been slain. Thanks for playing.",list_of_clients[chosen])            
             roles[chosen] = "Ded"
-            broadcast("kill", "Werewolf KILLS message", '') # To do <<<
+
+    # Check number of werewolves left
     werewolf_left = [i for i, x in enumerate(tally) if x == "werewolf"]
-    if len(roles) <= len(werewolf_left) + 1 :
+    if len(roles) - 1 <= len(werewolf_left) :
         # Werewolf win <<
-        broadcast("werewolfwin", "Werewolf won", '')
+        broadcast("status", "Werewolf won", '')
+        time.sleep(1)
+        ingame = False
     elif len(werewolf_left) == 0:
         # Villager win <<
-            broadcast("villagerwin", "Villager won", '')
-
+        broadcast("status", "Villager won", '')
+        time.sleep(1)
+        ingame = False
     tallyReset()
 
 
@@ -81,7 +98,10 @@ def roleRandomizer():
     roles = list_of_sides[:num_participant]
     random.shuffle(roles)
     roles[1:], roles[0] = roles[0:], ''
-    # >>> Broadcast role <<<
+    # Broadcast role
+    for i in range(1,len(list_of_clients)):
+        to_client("role", roles[i], list_of_clients[i])
+
 
 def tallyReset():
     for i in range(len(tally)):
@@ -93,8 +113,11 @@ def clientthread(conn, addr):
         try:
             message_from_client = conn.recv(2048)
             message = marshal.loads(message_from_client)
+            # Player Count
+            if message[0] == "numberofplayer":
+                number_of_player = int(message[1])
             # Jika mengirim nama
-            if message[0] == "name":
+            elif message[0] == "name":
                 client_names.append(message[1])
             # Jika memulai game
             elif message[0] == "start":
@@ -125,7 +148,7 @@ def to_client(msg_type, message,connection):
 
 def broadcast(msg_type, message, connection):
     for clients in list_of_clients:
-        if clients != connection:
+        if clients != connection and clients != '':
             try:
                 message_to_send = [msg_type, message]
                 clients.send(marshal.dumps(message_to_send))
@@ -137,3 +160,8 @@ def broadcast(msg_type, message, connection):
 def remove(connection):
     if connection in list_of_clients:
         list_of_clients.remove(connection)
+
+def endgame():
+    for clients in list_of_clients:
+        if clients != '':
+            clients.close()
