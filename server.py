@@ -6,6 +6,8 @@ from thread import *
 import marshal
 import random
 
+# -- Main
+
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
@@ -14,83 +16,88 @@ Port = 8081
 server.bind((IP_address, Port))
 server.listen(10)
 
-list_of_clients = []  # Berisi IP dan Port Klien mulai dari index 1
-roles = []  # Berisi Role dari Klien mulai dari index 1
-client_names = []  # Berisi Nama Klien mulai dari index 1
+list_of_clients = ['']  # Berisi IP dan Port Klien mulai dari index 1
+roles = ['']  # Berisi Role dari Klien mulai dari index 1
+client_names = ['']  # Berisi Nama Klien mulai dari index 1
 tally = [0, 0, 0, 0, 0, 0, 0, 0, 0] # Index ke-0 tidak dipakai 
+number_of_player = 4 # by default
 start_game = False
+ingame = True
 
 list_of_sides = ["villager", "werewolf", "villager", "seer", "villager", "werewolf", "villager", "villager"] 
 
+# -- End of main ----------------------------------------------
+
+
+# --- Functions and Utilities ---
 # Game mechanism here
 def werewolfGame():
-    print "game start"
+    global roles, ingame
     roleRandomizer()
-    broadcast("daftar pemain",client_names,'')
-    broadcast("daftar role",roles,'')
-    while True:
+    while ingame:
         # Afternoon Phase
         broadcast("afternoon", "Village at a Day, you are headed to the assembly.", '')
-        count = 60
-        while count != 0:
-            broadcast("countdown",count,'')
-            count-=1
-            time.sleep(1)
+        time.sleep(1)
         # Voting Phase
         broadcast("voting", "Vote a player to execute!", '')
-        count = 30
-        while count != 0:
-            broadcast("countdown",count,'')
-            count-=1
-            time.sleep(1)
-        hasil = revise("villager vote")
-        if hasil == 1:
-            return 0
+        print roles
+        time.sleep(30)
+        revise("villager vote")
+        if ingame == False:
+            endgame()
         # Night Phase
         broadcast("night", "The darkness comes, you are in your home with candle lights.", '')
-        count = 20
-        while count != 0:
-            broadcast("countdown",count,'')
-            count-=1
-            time.sleep(1)
-        hasil = revise("werewolf vote")
-        if hasil == 1:
-            return 0
-    return
+        time.sleep(20)
+        revise("werewolf vote")
+        if ingame == False:
+            endgame()
+    endgame()
         
 
 def revise(arg):
+    global ingame,roles
     if arg.startswith('v'):
         chosen = [i for i, x in enumerate(tally) if x == max(tally)]
         if len(chosen) == 1:
             # Execute and reveal
-            roles[chosen] = "Ded"
-            broadcast("execute", "REVEAL message", '') # To do <<<
+            
+            broadcast("execute", "The Village executed " + str(client_names[chosen[0]]) + "Turns out " + str(chosen[0]) + " is a " + str(roles[chosen[0]]), '')
+            to_client("killed", "You have been slain. Thanks for playing.",list_of_clients[chosen[0]])
+            roles[chosen[0]] = "Ded"
+            
     elif arg.startswith('w'):
         chosen = [i for i, x in enumerate(tally) if x == max(tally)]
         if len(chosen) == 1:
             # Execute and reveal
-            roles[chosen] = "Ded"
-            broadcast("kill", "Werewolf KILLS message", '') # To do <<<
+            broadcast("execute", "The Werewolves kills " + str(client_names[chosen[0]]) + "Turns out " + str(chosen[0]) + " is a " + str(roles[chosen[0]]), '')
+            to_client("killed", "You have been slain. Thanks for playing.",list_of_clients[chosen[0]])            
+            roles[chosen[0]] = "Ded"
+
+    # Check number of werewolves left
     werewolf_left = [i for i, x in enumerate(tally) if x == "werewolf"]
-    if len(roles) <= len(werewolf_left) + 1 :
+
+    if len(roles) - 1 <= len(werewolf_left) :
         # Werewolf win <<
-        broadcast("werewolfwin", "Werewolf won", '')
-        return 1
+        broadcast("status", "Werewolf won", '')
+        time.sleep(1)
+        ingame = False
     elif len(werewolf_left) == 0:
         # Villager win <<
-            broadcast("villagerwin", "Villager won", '')
-            return 1
-
+        broadcast("status", "Villager won", '')
+        time.sleep(1)
+        ingame = False
     tallyReset()
 
 
 def roleRandomizer():
+    global roles
     num_participant = len(list_of_clients) - 1
     roles = list_of_sides[:num_participant]
     random.shuffle(roles)
     roles[1:], roles[0] = roles[0:], ''
-    # >>> Broadcast role <<<
+    # Broadcast role
+    for i in range(1,len(list_of_clients)):
+        to_client("role", roles[i], list_of_clients[i])
 
 
 def tallyReset():
@@ -101,37 +108,33 @@ def tallyReset():
 def clientthread(conn, addr):
     while True:
         try:
-            # deklarasi start_game sebagai global
-            global start_game
             message_from_client = conn.recv(2048)
             message = marshal.loads(message_from_client)
-            print(message)
-            # pisah pesan
-            pesan = []
-            pesan = message.split(" ")  
+            print message
+            print message[0]
+            # Player Count
+            if message[0] == "numberofplayer":
+                number_of_player = int(message[1])
             # Jika mengirim nama
-            if pesan[0] == "name":
-                client_names.append(pesan[1])
+            elif message[0] == "name":
+                client_names.append(message[1])
                 print client_names
-                print conn
+            # Jika memulai game
+            elif message[0] == "start":
+                start_game = True
             # Jika mengirim chat pada siang hari
-            elif pesan[0] == "chat":
-                mess = addr[0]
-                for i in len(pesan):
-                    if i == 0:
-                        continue
-                    mess += pesan[i] + " "
-                broadcast("chat", mess, conn)
+            elif message[0] == "chat":
+                broadcast("chat", client_names[list_of_clients.index(conn)] + " : " + message[1], conn)
             # Voting siang
-            elif pesan[0] == "vote":
-                target = int(pesan[1])
+            elif message[0] == "vote":
+                target = int(message[1])
                 tally[target] += 1
                 broadcast("vote", client_names[list_of_clients.index(conn)] + ' (' + str(list_of_clients.index(conn)) + 
                     ') agreed to execute ' + client_names[target] + ' (' + str(target) + ')\n', conn)
             # Seer Ability
-            elif pesan[0] == "seer":
-                target = int(pesan[1])
-                message_to_seer = ["seer", str(target) + ' is ' + str(roles[target - 1])]
+            elif message[0] == "seer":
+                target = int(message[1])
+                message_to_seer = ["seer", str(target) + ' is ' + str(roles[target])]
                 to_client("seer", message_to_seer, conn)
             else:
                 remove(conn)
@@ -145,7 +148,7 @@ def to_client(msg_type, message,connection):
 
 def broadcast(msg_type, message, connection):
     for clients in list_of_clients:
-        if clients != connection:
+        if clients != connection and clients != '':
             try:
                 message_to_send = [msg_type, message]
                 clients.send(marshal.dumps(message_to_send))
@@ -158,21 +161,22 @@ def remove(connection):
     if connection in list_of_clients:
         list_of_clients.remove(connection)
 
+def endgame():
+    for clients in list_of_clients:
+        if clients != '':
+            clients.close()
+
 
 # Loading players
-num = 0
-while not start_game:
-    # print start_game
+while number_of_player > 0:
     conn, addr = server.accept()
     list_of_clients.append(conn)
     print(str(addr) + " connected")
     start_new_thread(clientthread, (conn, addr))
-    num += 1
-    if num == 8:
-        while len(client_names) < 8:
+    number_of_player -= 1
+    if number_of_player == 0:
+        while len(client_names)<5 :
             time.sleep(1)
-        start_game = True
 
 werewolfGame()
-conn.close()
 server.close()
