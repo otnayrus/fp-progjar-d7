@@ -20,7 +20,7 @@ list_of_clients = ['']  # Berisi IP dan Port Klien mulai dari index 1
 roles = ['']  # Berisi Role dari Klien mulai dari index 1
 client_names = ['']  # Berisi Nama Klien mulai dari index 1
 tally = [0, 0, 0, 0, 0, 0, 0, 0, 0] # Index ke-0 tidak dipakai 
-number_of_player = 8 # by default
+number_of_player = 6 # by default
 start_game = False
 
 list_of_sides = ["villager", "werewolf", "villager", "seer", "villager", "werewolf", "villager", "villager"] 

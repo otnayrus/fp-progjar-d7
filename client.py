@@ -254,6 +254,6 @@ def chat_room():
 				chatRender(chats, color, text)
 		
 
-chat_room()
-#game_intro()
+#chat_room()
+game_intro()
 pygame.quit()			
