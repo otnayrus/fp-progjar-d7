@@ -3,6 +3,7 @@ import threading
 import socket
 import marshal
 from thread import *
+import time
 
 pygame.init()
 players = []
@@ -40,7 +41,7 @@ server2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 Port2 = 8082
 server2.connect((IP_address,Port2))
 start = "NOPE"
-
+eventnow = ['','']
     
 
 # ----------------------------------------------
@@ -163,7 +164,6 @@ def your_name():
 
 	while your_name :
 		gameDisplay.fill((30,30,30))
-
 		createText("Your Name","freesansbold.ttf",50,white,display_width/2,display_height*0.4)
 		events=pygame.event.get()
 		form(0,(display_width*0.338),(display_height*0.5),150,50,pygame.Color('lightskyblue3'),pygame.Color('dodgerblue2'),None,32,white,events,send_name)
@@ -195,18 +195,29 @@ def wait_room():
 				quitgame()
 		if start == "START":
 			wait_room = False
-			your_role()
+			your_role_f()
 		pygame.display.update()
 		clock.tick(30)
 
-def your_role():
+def transisi(action=None):
+	global eventnow
+	# players = ["player a","player b","player c"]
+	gameDisplay.fill((30, 30, 30))
+	createText(eventnow[1],"freesansbold.ttf",20,white,display_width/2,display_height*0.1)
+	for event in pygame.event.get():
+		if event.type == pygame.QUIT:
+			quitgame()
+	pygame.display.update()
+	time.sleep(3)
+	action()
+
+def your_role_f():
 	global your_role
 	global role
+	global eventnow
 
 	your_role = True
 	while your_role:
-		print role
-
 		gameDisplay.fill((30, 30, 30))
 		createText("You are a","freesansbold.ttf",50,white,display_width/2,display_height*0.1)
 		# print role
@@ -218,6 +229,9 @@ def your_role():
 				quitgame()
 		pygame.display.update()
 		clock.tick(30)
+		if eventnow[0]=="afternoon":
+			your_role = False
+			transisi(chat_room_f)
 
 def event_vote():
 	global event_vote
@@ -240,7 +254,6 @@ def chatRender(chats, color, text):
 	font = pygame.font.Font(None, 32)
 	input_box = pygame.Rect(50, 550, 240, 32)
 	height_chat = 500
-	gameDisplay.fill((30, 30, 30))
 	createText("Discussion Time","freesansbold.ttf",50,white,display_width/2,display_height*0.1)
 	for chat in reversed(chats):
 		chatText(chat,"freesansbold.ttf",20,white,50,height_chat)
@@ -252,8 +265,15 @@ def chatRender(chats, color, text):
 	pygame.draw.rect(gameDisplay, color, input_box, 2)
 	pygame.display.update()
 
-def chat_room():
+def dis_time():
+	global waktu
+	while waktu>0:
+		time.sleep(1)
+		waktu = waktu - 1
+
+def chat_room_f():
 	global chat_room
+	global waktu
 	chats = []
 	input_box = pygame.Rect(50, 550, 240, 32)
 	clock = pygame.time.Clock()
@@ -263,9 +283,12 @@ def chat_room():
 	active = False
 	text = ''
 	chat_room = True
-	time = 30
+	waktu = 3
+	start_new_thread(dis_time,())
 	chatRender(chats, color, text)
 	while chat_room:
+		gameDisplay.fill((30, 30, 30))
+		createText(str(waktu),"freesansbold.ttf",30,white,display_width/2,display_height*0.2)
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				quitgame()
@@ -287,12 +310,18 @@ def chat_room():
 						text = text[:-1]
 					else:
 						text += event.unicode
-				chatRender(chats, color, text)
+		chatRender(chats, color, text)
+		if waktu==0:
+			your_role_f()
+			chat_room = False
+
+
 
 def clientthread():
 	global players
 	global role
 	global start
+	global eventnow
 	while True:
 		msg = server2.recv(2048)
 		message = marshal.loads(msg)
@@ -303,7 +332,9 @@ def clientthread():
 			role = message[1]
 		elif message[0] == 'state':
 			start = message[1]
-			print start
+		elif message[0] == 'afternoon':
+			eventnow[0] = message[0]
+			eventnow[1] = message[1]
 
 start_new_thread(clientthread,())
 game_intro()

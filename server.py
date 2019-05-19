@@ -42,6 +42,7 @@ list_of_sides = ["villager", "werewolf", "villager", "seer", "villager", "werewo
 # Game mechanism here
 def werewolfGame():
     roleRandomizer()
+    time.sleep(5)
     while ingame:
         # Afternoon Phase
         broadcast("afternoon", "Village at a Day, you are headed to the assembly.", '')
@@ -101,8 +102,6 @@ def roleRandomizer():
     # Broadcast role
     for i in range(1,len(list_of_clients2)):
         to_client("role", roles[i], list_of_clients2[i])
-
-
 
 def tallyReset():
     for i in range(len(tally)):
