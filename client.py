@@ -20,7 +20,7 @@ dark_blue = (0,0,100)
 bright_green = (0,255,0)
 bright_blue = (0,0,210)
 role = ''
-
+chats =[]
 gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption("Werewolf")
 clock = pygame.time.Clock()
@@ -35,7 +35,7 @@ def send_name(name):
 	global namamu
 	namamu = name
 	server.send(marshal.dumps(["name",name]))
-	wait_room()
+	wait_room_f()
 
 server2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 Port2 = 8082
@@ -171,7 +171,7 @@ def your_name():
 		pygame.display.update()
 		clock.tick(50)
 
-def wait_room():
+def wait_room_f():
 	global wait_room
 	global players
 	global your_name
@@ -210,6 +210,8 @@ def transisi(action=None):
 	pygame.display.update()
 	time.sleep(3)
 	action()
+	eventnow[0]=''
+	eventnow[1]=''
 
 def your_role_f():
 	global your_role
@@ -250,7 +252,8 @@ def event_vote():
 		pygame.display.update()
 		clock.tick(30)
 
-def chatRender(chats, color, text):
+def chatRender(color, text):
+	global chats
 	font = pygame.font.Font(None, 32)
 	input_box = pygame.Rect(50, 550, 240, 32)
 	height_chat = 500
@@ -274,6 +277,7 @@ def dis_time():
 def chat_room_f():
 	global chat_room
 	global waktu
+	global chats
 	chats = []
 	input_box = pygame.Rect(50, 550, 240, 32)
 	clock = pygame.time.Clock()
@@ -283,9 +287,9 @@ def chat_room_f():
 	active = False
 	text = ''
 	chat_room = True
-	waktu = 3
+	# waktu = 30	
 	start_new_thread(dis_time,())
-	chatRender(chats, color, text)
+	chatRender(color, text)
 	while chat_room:
 		gameDisplay.fill((30, 30, 30))
 		createText(str(waktu),"freesansbold.ttf",30,white,display_width/2,display_height*0.2)
@@ -298,30 +302,30 @@ def chat_room_f():
 				else:
 					active = False
 				color = color_active if active else color_inactive
-				chatRender(chats, color, text)
+				chatRender(color, text)
 			if event.type == pygame.KEYDOWN:
 				if active:
 					if event.key == pygame.K_RETURN:
 						print(text)
-						chats.append(str(text))
-						print chats
+						# print chats
+						server.send(marshal.dumps(["chat",text]))
 						text = ''
 					elif event.key == pygame.K_BACKSPACE:
 						text = text[:-1]
 					else:
 						text += event.unicode
-		chatRender(chats, color, text)
+		chatRender(color, text)
 		if waktu==0:
 			your_role_f()
 			chat_room = False
-
-
 
 def clientthread():
 	global players
 	global role
 	global start
 	global eventnow
+	global waktu
+	global chats
 	while True:
 		msg = server2.recv(2048)
 		message = marshal.loads(msg)
@@ -335,6 +339,12 @@ def clientthread():
 		elif message[0] == 'afternoon':
 			eventnow[0] = message[0]
 			eventnow[1] = message[1]
+		elif message[0] == 'chat_time':
+			waktu = message[1]
+			print waktu
+		elif message[0] == 'chat':
+			chats.append(message[1])
+			# print waktu
 
 start_new_thread(clientthread,())
 game_intro()
