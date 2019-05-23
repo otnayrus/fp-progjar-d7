@@ -27,7 +27,7 @@ server2.listen(10)
 list_of_clients = ['']  # Berisi IP dan Port Klien mulai dari index 1
 list_of_clients2 = ['']
 roles = ['']  # Berisi Role dari Klien mulai dari index 1
-client_names = ['','','','','','','']  # Berisi Nama Klien mulai dari index 1
+client_names = ['']  # Berisi Nama Klien mulai dari index 1
 tally = [0, 0, 0, 0, 0, 0, 0, 0, 0] # Index ke-0 tidak dipakai 
 number_of_player = 4 # by default
 number_of_name = 4
@@ -42,7 +42,10 @@ list_of_sides = ["villager", "werewolf", "villager", "seer", "villager", "werewo
 # Game mechanism here
 def werewolfGame():
     roleRandomizer()
-    time.sleep(5)
+    time.sleep(1)
+    broadcast("state","START",'')
+    time.sleep(3)
+
     while ingame:
         # Afternoon Phase
         broadcast("afternoon", "Village at a Day, you are headed to the assembly.", '')
@@ -70,27 +73,27 @@ def werewolfGame():
         
 
 def revise(arg):
-    global roles
+    global ingame,roles
     if arg.startswith('v'):
         chosen = [i for i, x in enumerate(tally) if x == max(tally)]
         if len(chosen) == 1:
             # Execute and reveal
-            broadcast("execute", "The Village executed " + str(client_names[chosen]) + 
-                "Turns out " + str(chosen) + " is a " + str(roles[chosen]), '')
-            to_client("killed", "You have been slain. Thanks for playing.",list_of_clients[chosen])
-            roles[chosen] = "Ded"
+            
+            broadcast("execute", "The Village executed " + str(client_names[chosen[0]]) + "Turns out " + str(chosen[0]) + " is a " + str(roles[chosen[0]]), '')
+            to_client("killed", "You have been slain. Thanks for playing.",list_of_clients[chosen[0]])
+            roles[chosen[0]] = "Ded"
             
     elif arg.startswith('w'):
         chosen = [i for i, x in enumerate(tally) if x == max(tally)]
         if len(chosen) == 1:
             # Execute and reveal
-            broadcast("execute", "The Werewolves kills " + str(client_names[chosen]) + 
-                "Turns out " + str(chosen) + " is a " + str(roles[chosen]), '')
-            to_client("killed", "You have been slain. Thanks for playing.",list_of_clients[chosen])            
-            roles[chosen] = "Ded"
+            broadcast("execute", "The Werewolves kills " + str(client_names[chosen[0]]) + "Turns out " + str(chosen[0]) + " is a " + str(roles[chosen[0]]), '')
+            to_client("killed", "You have been slain. Thanks for playing.",list_of_clients[chosen[0]])            
+            roles[chosen[0]] = "Ded"
 
     # Check number of werewolves left
     werewolf_left = [i for i, x in enumerate(tally) if x == "werewolf"]
+
     if len(roles) - 1 <= len(werewolf_left) :
         # Werewolf win <<
         broadcast("status", "Werewolf won", '')
@@ -126,6 +129,7 @@ def clientthread(conn, addr):
         try:
             message_from_client = conn.recv(2048)
             message = marshal.loads(message_from_client)
+            print str(conn) + " >> " + str(message)
             # Player Count
             if message[0] == "numberofplayer":
                 number_of_player = int(message[1])
@@ -150,7 +154,7 @@ def clientthread(conn, addr):
             # Seer Ability
             elif message[0] == "seer":
                 target = int(message[1])
-                message_to_seer = ["seer", str(target) + ' is ' + str(roles[target - 1])]
+                message_to_seer = ["seer", str(target) + ' is ' + str(roles[target])]
                 to_client("seer", message_to_seer, conn)
             else:
                 remove(conn)
@@ -164,12 +168,9 @@ def to_client(msg_type, message,connection):
 
 def broadcast(msg_type, message, connection):
     for clients in list_of_clients2:
-        # print list_of_clients2
         if clients != connection and clients != '':
             try:
-                # print "aku ngesend"
                 message_to_send = [msg_type, message]
-                # print message_to_send
                 clients.send(marshal.dumps(message_to_send))
             except:
                 clients.close()
@@ -194,6 +195,9 @@ def statethread():
 start_new_thread(statethread,())
 
 # Loading players
+for i in range(0,number_of_player):
+    client_names.append('')
+
 while number_of_player > 0:
     conn, addr = server.accept()
     list_of_clients.append(conn)
@@ -205,7 +209,6 @@ while number_of_name > 0:
     continue
 
 # print "kluar"
-broadcast("state","START",'')
 
 ingame = True
 werewolfGame()

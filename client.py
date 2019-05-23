@@ -69,14 +69,16 @@ def chatText(text,font,size,color,x,y):
 	gameDisplay.blit(TextSurf,TextRect)
 
 
-def draw_button(text,text_size,font,font_color,x,y,width,height,color1,color2,action=None):
+def draw_button(text,text_size,font,font_color,x,y,width,height,color1,color2,action=None,arg=None):
 	mouse = pygame.mouse.get_pos()
 	click = pygame.mouse.get_pressed()
 	# print click
 	if x+width > mouse[0] > x and y+height > mouse[1] > y:
 		pygame.draw.rect(gameDisplay, color2, (x,y,width,height))
-		if click[0] == 1 and action != None:
+		if click[0] == 1 and action != None and arg == None:
 			action()
+		elif click[0] == 1 and action != None and arg != None:
+			action(arg)
 	else:
 		pygame.draw.rect(gameDisplay, color1, (x,y,width,height))
 	createText(text,font,text_size,font_color,(x+(width/2)),(y+(height/2)))
@@ -240,11 +242,15 @@ def your_role_f():
 		pygame.display.update()
 		clock.tick(30)
 
+def send_vote_f(index):
+	global server
+	print "voted"
+	server.send(marshal.dumps(["vote",index]))
+
 def event_vote_f():
 	global event_vote
 	global players
 	global waktu_vote
-	# players = ["player a","player b","player c"]
 	event_vote = True
 	while event_vote:
 		height_p = 120
@@ -252,8 +258,8 @@ def event_vote_f():
 		createText("VOTE","freesansbold.ttf",50,white,display_width/2,display_height*0.1)
 		createText(str(waktu_vote),"freesansbold.ttf",30,white,display_width/2,display_height*0.2)
 		for player in players:
-			if player!=' ':
-				draw_button(player,20,"freesansbold.ttf",white,50,height_p,100,50,dark_blue,bright_blue,None)
+			if player!='':
+				draw_button(player,20,"freesansbold.ttf",white,50,height_p,100,50,dark_blue,bright_blue,send_vote_f,players.index(player))
 				height_p = height_p + 60
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
@@ -339,9 +345,9 @@ def clientthread():
 	while True:
 		msg = server2.recv(2048)
 		message = marshal.loads(msg)
+		print message
 		if message[0] == "name":
 			players = message[1]
-			# print players
 		elif message[0] == 'role':
 			role = message[1]
 		elif message[0] == 'state':
@@ -358,7 +364,6 @@ def clientthread():
 			waktu_vote = message[1]
 		elif message[0] == 'chat':
 			chats.append(message[1])
-			# print waktu
 
 start_new_thread(clientthread,())
 game_intro()
