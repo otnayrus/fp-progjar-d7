@@ -225,27 +225,29 @@ def your_role_f():
 	your_role = True
 	while your_role:
 		gameDisplay.fill((30, 30, 30))
-		createText("You are a","freesansbold.ttf",50,white,display_width/2,display_height*0.1)
 		# print role
-		if role != '':
-			img = "img/role-"+role+".jpg"
-			load_image(display_width*0.3,display_height*0.15,img)
+		if role == "Ded":
+			createText("You has been executed. Thanks for playing.","freesansbold.ttf",50,white,display_width/2,display_height*0.1)		
+		else:
+			createText("You are a","freesansbold.ttf",50,white,display_width/2,display_height*0.1)
+			if role != '':
+				img = "img/role-"+role+".jpg"
+				load_image(display_width*0.3,display_height*0.15,img)
+			if eventnow[0]=="afternoon":
+				your_role = False
+				transisi(chat_room_f)
+			if eventnow[0]=="voting":
+				your_role = False
+				transisi(event_vote_f)
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
-				quitgame()
-		if eventnow[0]=="afternoon":
-			your_role = False
-			transisi(chat_room_f)
-		if eventnow[0]=="voting":
-			your_role = False
-			transisi(event_vote_f)
+				quitgame()			
 		pygame.display.update()
 		clock.tick(30)
 
 def send_vote_f(index):
 	global server
 	global waktu_vote
-	print "voted"
 	server.send(marshal.dumps(["vote",index]))
 	while waktu_vote!=0:
 		gameDisplay.fill((30, 30, 30))
