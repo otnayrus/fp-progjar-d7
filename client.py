@@ -30,7 +30,6 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 IP_address = '127.0.0.1'
 Port = 8081
 server.connect((IP_address,Port))
-
 def send_name(name):
 	global namamu
 	namamu = name
@@ -42,7 +41,7 @@ Port2 = 8082
 server2.connect((IP_address,Port2))
 start = "NOPE"
 eventnow = ['','']
-    
+
 
 # ----------------------------------------------
 
@@ -202,7 +201,7 @@ def wait_room_f():
 		pygame.display.update()
 		clock.tick(30)
 
-def transisi(action=None):
+def transisi(action=None,arg=None):
 	global eventnow
 	# players = ["player a","player b","player c"]
 	gameDisplay.fill((30, 30, 30))
@@ -214,8 +213,18 @@ def transisi(action=None):
 	time.sleep(3)
 	eventnow[0]=" "
 	eventnow[1]=" "
-	action()
+	if arg!=None:
+		action(arg)
+	else:
+		action()
 	
+def you_died_f():
+	youdied = True
+	while youdied:
+		gameDisplay.fill((30, 30, 30))
+		createText("You has been executed. Thanks for playing.","freesansbold.ttf",50,white,display_width/2,display_height*0.1)		
+		pygame.display.update()
+
 
 def your_role_f():
 	global your_role
@@ -227,7 +236,10 @@ def your_role_f():
 		gameDisplay.fill((30, 30, 30))
 		# print role
 		if role == "Ded":
-			createText("You has been executed. Thanks for playing.","freesansbold.ttf",50,white,display_width/2,display_height*0.1)		
+			your_role = False
+			print role
+			you_died_f()
+			break
 		else:
 			createText("You are a","freesansbold.ttf",50,white,display_width/2,display_height*0.1)
 			if role != '':
@@ -238,7 +250,17 @@ def your_role_f():
 				transisi(chat_room_f)
 			if eventnow[0]=="voting":
 				your_role = False
-				transisi(event_vote_f)
+				transisi(event_vote_f,"voting")
+			if eventnow[0]=="night":
+				your_role = False
+				transisi(your_role_f)
+			if eventnow[0]=="eat":
+				your_role = False
+				transisi(event_vote_f,"eat")
+			if eventnow[0]=="seer":
+				your_role = False
+				transisi(event_vote_f,"seer")
+
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				quitgame()			
@@ -258,20 +280,28 @@ def send_vote_f(index):
 	your_role_f()
 
 
-def event_vote_f():
+def event_vote_f(now):
 	global event_vote
 	global players
 	global waktu_vote
+	global eventnow
+	global namamu
 	event_vote = True
 	while event_vote:
 		height_p = 120
 		gameDisplay.fill((30, 30, 30))
 		createText("VOTE","freesansbold.ttf",50,white,display_width/2,display_height*0.1)
 		createText(str(waktu_vote),"freesansbold.ttf",30,white,display_width/2,display_height*0.2)
-		for player in players:
-			if player!='':
-				draw_button(player,20,"freesansbold.ttf",white,50,height_p,100,50,dark_blue,bright_blue,send_vote_f,players.index(player))
-				height_p = height_p + 60
+		if now=="voting":
+			for player in players:
+				if player!='':
+					draw_button(player,20,"freesansbold.ttf",white,50,height_p,100,50,dark_blue,bright_blue,send_vote_f,players.index(player))
+					height_p = height_p + 60
+		if now=="night" or now=="eat" or now=="seer" :
+			for player in players:
+				if player!='' and player != namamu:
+					draw_button(player,20,"freesansbold.ttf",white,50,height_p,100,50,dark_blue,bright_blue,send_vote_f,players.index(player))
+					height_p = height_p + 60
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				quitgame()
@@ -367,6 +397,15 @@ def clientthread():
 			eventnow[0] = message[0]
 			eventnow[1] = message[1]
 		elif message[0] == 'voting':
+			eventnow[0] = message[0]
+			eventnow[1] = message[1]
+		elif message[0] == 'night':
+			eventnow[0] = message[0]
+			eventnow[1] = message[1]
+		elif message[0] == 'eat':
+			eventnow[0] = message[0]
+			eventnow[1] = message[1]
+		elif message[0] == 'seer':
 			eventnow[0] = message[0]
 			eventnow[1] = message[1]
 		elif message[0] == 'chat_time':

@@ -69,11 +69,16 @@ def werewolfGame():
         broadcast("night", "The darkness comes, you are in your home with candle lights.", '')
         for i in roles:
             if i == "werewolf":
-                to_client("voting", "You werewolf wanted to kill!", list_of_clients2[roles.index(i)])
+                to_client("eat", "You werewolf wanted to kill!", list_of_clients2[roles.index(i)])
             elif i == "seer":
                 to_client("seer", "Use your seer ability.", list_of_clients2[roles.index(i)])
-        time.sleep(20)
+        waktu = 30
+        while waktu > -1:
+            broadcast("vote_time",waktu,'')
+            time.sleep(1) 
+            waktu = waktu - 1
         revise("werewolf vote")
+        time.sleep(3)
     endgame()
         
 
