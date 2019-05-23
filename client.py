@@ -186,8 +186,9 @@ def wait_room_f():
 
 		createText("Waiting Room","freesansbold.ttf",50,white,display_width/2,display_height*0.1)
 		for player in reversed(players):
-			chatText(player,"freesansbold.ttf",50,white,120,height_p)
-			height_p = height_p +50
+			if player!= ' ':
+				chatText(player,"freesansbold.ttf",50,white,120,height_p)
+				height_p = height_p +50
 
 		# draw_button("Start",20,"freesansbold.ttf",white,(display_width*0.5)-75,(display_height*0.75),150,100,black,dark_gray,your_role)
 		for event in pygame.event.get():
@@ -242,20 +243,27 @@ def your_role_f():
 def event_vote_f():
 	global event_vote
 	global players
+	global waktu_vote
 	# players = ["player a","player b","player c"]
 	event_vote = True
 	while event_vote:
 		height_p = 120
 		gameDisplay.fill((30, 30, 30))
 		createText("VOTE","freesansbold.ttf",50,white,display_width/2,display_height*0.1)
+		createText(str(waktu_vote),"freesansbold.ttf",30,white,display_width/2,display_height*0.2)
 		for player in players:
-			draw_button(player,20,"freesansbold.ttf",white,50,height_p,100,50,dark_blue,bright_blue,None)
-			height_p = height_p + 60
+			if player!=' ':
+				draw_button(player,20,"freesansbold.ttf",white,50,height_p,100,50,dark_blue,bright_blue,None)
+				height_p = height_p + 60
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				quitgame()
 		pygame.display.update()
 		clock.tick(30)
+		if waktu_vote==0:
+			event_vote = False
+			your_role_f()
+
 
 def chatRender(color, text):
 	global chats
@@ -327,6 +335,7 @@ def clientthread():
 	global eventnow
 	global waktu
 	global chats
+	global waktu_vote
 	while True:
 		msg = server2.recv(2048)
 		message = marshal.loads(msg)
@@ -345,7 +354,8 @@ def clientthread():
 			eventnow[1] = message[1]
 		elif message[0] == 'chat_time':
 			waktu = message[1]
-			print waktu
+		elif message[0] == 'vote_time':
+			waktu_vote = message[1]
 		elif message[0] == 'chat':
 			chats.append(message[1])
 			# print waktu
