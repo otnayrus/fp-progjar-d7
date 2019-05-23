@@ -60,22 +60,21 @@ def werewolfGame():
         # Voting Phase
         broadcast("voting", "Vote a player to execute!", '')
         time.sleep(3)
-        waktu = 30
+        waktu = 5
         while waktu > -1:
             broadcast("vote_time",waktu,'')
             time.sleep(1) 
             waktu = waktu - 1
         revise("villager vote")
         # Night Phase
-        time.sleep(3)
-        broadcast("night", "The darkness comes, you are in your home with candle lights.", '')
-        time.sleep(4)
         for i in roles:
             if i == "werewolf":
                 to_client("eat", "You werewolf wanted to kill!", list_of_clients2[roles.index(i)])
             elif i == "seer":
                 to_client("seer", "Use your seer ability.", list_of_clients2[roles.index(i)])
-        waktu = 30
+            elif i == "villager":
+                to_client("night", "The darkness comes, you are in your home with candle lights.", list_of_clients2[roles.index(i)])
+        waktu = 10
         while waktu > -1:
             broadcast("vote_time",waktu,'')
             time.sleep(1) 
@@ -161,13 +160,12 @@ def clientthread(conn, addr):
             elif message[0] == "vote":
                 target = int(message[1])
                 tally[target] += 1
-                broadcast("vote", client_names[list_of_clients.index(conn)] + ' (' + str(list_of_clients.index(conn)) + 
-                    ') agreed to execute ' + client_names[target] + ' (' + str(target) + ')\n', conn)
+                #broadcast("vote", client_names[list_of_clients.index(conn)] + ' (' + str(list_of_clients.index(conn)) + ') agreed to execute ' + client_names[target] + ' (' + str(target) + ')\n', conn)
             # Seer Ability
             elif message[0] == "seer":
                 target = int(message[1])
                 message_to_seer = ["seer_result", str(target) + ' is ' + str(roles[target])]
-                to_client("seer_result", message_to_seer, conn)
+                to_client("seer_result", message_to_seer, list_of_clients2[list_of_clients.index(conn)])
             else:
                 remove(conn)
         except:
@@ -223,5 +221,7 @@ while number_of_name > 0:
 # print "kluar"
 
 ingame = True
+werewolfGame()
+server.close()
 werewolfGame()
 server.close()
