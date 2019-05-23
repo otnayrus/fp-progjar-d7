@@ -85,32 +85,31 @@ def werewolfGame():
 
 def revise(arg):
     global ingame,roles
-    if arg.startswith('v'):
+    if arg.startswith('villager'): # villager vote
         chosen = [i for i, x in enumerate(tally) if x == max(tally)]
         if len(chosen) == 1:
-            # Execute and reveal
             broadcast("execute", "The Village executed " + str(client_names[chosen[0]]) + " Turns out " + str(chosen[0]) + " is a " + str(roles[chosen[0]]), '')
             to_client("role", "Ded", list_of_clients2[chosen[0]])
             roles[chosen[0]] = "Ded"
             
-    elif arg.startswith('w'):
+    elif arg.startswith('werewolf'): # werewolf vote
         chosen = [i for i, x in enumerate(tally) if x == max(tally)]
         if len(chosen) == 1:
-            # Execute and reveal
             broadcast("execute", "The Werewolves kills " + str(client_names[chosen[0]]) + " Turns out " + str(chosen[0]) + " is a " + str(roles[chosen[0]]), '')
             to_client("role", "Ded", list_of_clients2[chosen[0]])            
             roles[chosen[0]] = "Ded"
 
     # Check number of werewolves left
-    werewolf_left = [i for i, x in enumerate(tally) if x == "werewolf"]
-    print roles
-    print werewolf_left
-    if len(roles) - 1 <= len(werewolf_left) :
+    werewolf_left = roles.count("werewolf")
+    slain_peeps = roles.count("Ded")
+    print "roles = " + str(roles)
+    print "ww left = " + str(werewolf_left)
+    if len(roles) - slain_peeps - 1 < werewolf_left :
         # Werewolf win <<
         broadcast("status", "Werewolf won", '')
         time.sleep(1)
         ingame = False
-    elif len(werewolf_left) == 0:
+    elif werewolf_left == 0:
         # Villager win <<
         broadcast("status", "Villager won", '')
         time.sleep(1)
@@ -165,8 +164,8 @@ def clientthread(conn, addr):
             # Seer Ability
             elif message[0] == "seer":
                 target = int(message[1])
-                message_to_seer = ["seer", str(target) + ' is ' + str(roles[target])]
-                to_client("seer", message_to_seer, conn)
+                message_to_seer = ["seer_result", str(target) + ' is ' + str(roles[target])]
+                to_client("seer_result", message_to_seer, conn)
             else:
                 remove(conn)
         except:

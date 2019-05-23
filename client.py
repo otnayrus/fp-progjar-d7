@@ -217,7 +217,20 @@ def transisi(action=None,arg=None):
 		action(arg)
 	else:
 		action()
-	
+
+def announcement_f(arg):
+	global eventnow
+	announcement = True
+	while announcement:
+		gameDisplay.fill((30, 30, 30))
+		createText(eventnow[1],"freesansbold.ttf",20,white,display_width/2,display_height*0.1)
+		pygame.display.update()
+		clock.tick(30)
+		if eventnow[0] != arg:
+			announcement = False
+	your_role_f()
+
+
 def you_died_f():
 	youdied = True
 	while youdied:
@@ -245,24 +258,27 @@ def your_role_f():
 			if role != '':
 				img = "img/role-"+role+".jpg"
 				load_image(display_width*0.3,display_height*0.15,img)
-			if eventnow[0]=="afternoon":
+			elif eventnow[0]=="afternoon":
 				your_role = False
 				transisi(chat_room_f)
-			if eventnow[0]=="voting":
+			elif eventnow[0]=="voting":
 				your_role = False
 				transisi(event_vote_f,"voting")
-			if eventnow[0]=="night":
+			elif eventnow[0]=="night":
 				your_role = False
 				transisi(your_role_f)
-			if eventnow[0]=="eat":
+			elif eventnow[0]=="eat":
 				your_role = False
 				transisi(event_vote_f,"eat")
-			if eventnow[0]=="seer":
+			elif eventnow[0]=="seer":
 				your_role = False
 				transisi(event_vote_f,"seer")
-			if eventnow[0]=="execute":
+			elif eventnow[0]=="seer_result":
 				your_role = False
-				transisi(your_role_f)
+				transisi(announcement_f,"seer_result")
+			elif eventnow[0]=="execute":
+				your_role = False
+				transisi(announcement_f, "execute")
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				quitgame()			
@@ -427,7 +443,6 @@ def clientthread():
 
 start_new_thread(clientthread,())
 game_intro()
-#chat_room()
 pygame.quit()
 
 # ---------------------------------------------------------------------------------------------------
