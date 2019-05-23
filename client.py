@@ -244,8 +244,17 @@ def your_role_f():
 
 def send_vote_f(index):
 	global server
+	global waktu_vote
 	print "voted"
 	server.send(marshal.dumps(["vote",index]))
+	while waktu_vote!=0:
+		gameDisplay.fill((30, 30, 30))
+		createText("Thank you for your vote!","freesansbold.ttf",50,white,display_width/2,display_height*0.1)
+		createText("Waiting for other player...","freesansbold.ttf",50,white,display_width/2,display_height*0.3)
+		pygame.display.update()
+		clock.tick(30)
+	your_role_f()
+
 
 def event_vote_f():
 	global event_vote
