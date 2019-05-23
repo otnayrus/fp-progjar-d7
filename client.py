@@ -235,6 +235,16 @@ def you_died_f():
 		createText("You has been executed.","freesansbold.ttf",50,white,display_width/2,display_height*0.1)		
 		pygame.display.update()
 
+def endgame_f():
+	global eventnow
+	gameend = eventnow[1]
+	while True:
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				quitgame()
+		gameDisplay.fill((30, 30, 30))
+		createText(str(gameend),"freesansbold.ttf",50,white,display_width/2,display_height*0.1)		
+		pygame.display.update()
 
 def your_role_f():
 	global your_role
@@ -276,6 +286,9 @@ def your_role_f():
 			if eventnow[0]=="execute":
 				your_role = False
 				transisi(announcement_f, "execute")
+			if eventnow[0]=="status":
+				your_role = False
+				endgame_f()
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				quitgame()			
@@ -306,6 +319,7 @@ def seer_ability_f(target):
 		createText("Thank you for your vote!","freesansbold.ttf",50,white,display_width/2,display_height*0.1)
 		createText("Processing result.","freesansbold.ttf",50,white,display_width/2,display_height*0.3)
 		pygame.display.update()
+	
 	announcement_f("seer_result")
 
 def event_vote_f(now):
@@ -415,6 +429,7 @@ def clientthread():
 	global waktu
 	global chats
 	global waktu_vote
+	global status
 	while True:
 		msg = server2.recv(2048)
 		message = marshal.loads(msg)
@@ -452,6 +467,10 @@ def clientthread():
 		elif message[0] == "seer_result":
 			eventnow[0] = message[0]
 			eventnow[1] = message[1]
+		elif message[0] == 'status':
+			eventnow[0] = message[0]
+			eventnow[1] = message[1]
+
 
 start_new_thread(clientthread,())
 game_intro()

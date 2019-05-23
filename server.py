@@ -65,9 +65,10 @@ def werewolfGame():
             broadcast("vote_time",waktu,'')
             time.sleep(1) 
             waktu = waktu - 1
-        revise("villager vote")
-        # Night Phase
         time.sleep(4)
+        revise("villager vote")
+        time.sleep(8)
+        # Night Phase
         broadcast("night", "The darkness comes, you are in your home with candle lights.", '')
         time.sleep(4)
         for i in roles:
@@ -81,6 +82,7 @@ def werewolfGame():
             broadcast("vote_time",waktu,'')
             time.sleep(1) 
             waktu = waktu - 1
+        time.sleep(3)
         revise("werewolf vote")
         time.sleep(9)
     endgame()
@@ -91,14 +93,14 @@ def revise(arg):
     if arg.startswith('villager'): # villager vote
         chosen = [i for i, x in enumerate(tally) if x == max(tally)]
         if len(chosen) == 1:
-            broadcast("execute", "The Village executed " + str(client_names[chosen[0]]) + " Turns out " + str(chosen[0]) + " is a " + str(roles[chosen[0]]), '')
+            broadcast("execute", "The Village executed " + str(client_names[chosen[0]]) + " Turns out " + str(client_names[chosen[0]]) + " is a " + str(roles[chosen[0]]), '')
             to_client("role", "Ded", list_of_clients2[chosen[0]])
             roles[chosen[0]] = "Ded"
             
     elif arg.startswith('werewolf'): # werewolf vote
         chosen = [i for i, x in enumerate(tally) if x == max(tally)]
         if len(chosen) == 1:
-            broadcast("execute", "The Werewolves kills " + str(client_names[chosen[0]]) + " Turns out " + str(chosen[0]) + " is a " + str(roles[chosen[0]]), '')
+            broadcast("execute", "The Werewolves kills " + str(client_names[chosen[0]]) + " Turns out " + str(client_names[chosen[0]]) + " is a " + str(roles[chosen[0]]), '')
             to_client("role", "Ded", list_of_clients2[chosen[0]])            
             roles[chosen[0]] = "Ded"
 
@@ -166,7 +168,7 @@ def clientthread(conn, addr):
             # Seer Ability
             elif message[0] == "seer":
                 target = int(message[1])
-                message_to_seer = ["seer_result", str(target) + ' is ' + str(roles[target])]
+                message_to_seer = [str(client_names[target]) + ' is ' + str(roles[target])]
                 to_client("seer_result", message_to_seer, list_of_clients2[list_of_clients.index(conn)])
             else:
                 remove(conn)
