@@ -67,7 +67,9 @@ def werewolfGame():
             waktu = waktu - 1
         revise("villager vote")
         # Night Phase
+        time.sleep(3)
         broadcast("night", "The darkness comes, you are in your home with candle lights.", '')
+        time.sleep(4)
         for i in roles:
             if i == "werewolf":
                 to_client("eat", "You werewolf wanted to kill!", list_of_clients2[roles.index(i)])

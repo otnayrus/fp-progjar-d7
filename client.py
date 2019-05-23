@@ -316,13 +316,15 @@ def event_vote_f(now):
 				if player!='' and player != namamu:
 					draw_button(player,20,"freesansbold.ttf",white,50,height_p,100,50,dark_blue,bright_blue,send_vote_f,players.index(player))
 					height_p = height_p + 60
-		if now=="night" or now=="eat" or now=="seer" :
+		if now=="eat" or now=="seer" :
 			for player in players:
 				if player!='' and player != namamu:
 					if now == "eat" :
+						print "eat"
 						draw_button(player,20,"freesansbold.ttf",white,50,height_p,100,50,dark_blue,bright_blue,send_vote_f,players.index(player))
 						height_p = height_p + 60
 					if now == "seer" :
+						print "seer"
 						draw_button(player,20,"freesansbold.ttf",white,50,height_p,100,50,dark_blue,bright_blue,send_vote_f,players.index(player))
 						height_p = height_p + 60
 		for event in pygame.event.get():
