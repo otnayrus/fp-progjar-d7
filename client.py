@@ -278,6 +278,7 @@ def chat_room_f():
 	global chat_room
 	global waktu
 	global chats
+	global namamu
 	chats = []
 	input_box = pygame.Rect(50, 550, 240, 32)
 	clock = pygame.time.Clock()
@@ -308,7 +309,8 @@ def chat_room_f():
 					if event.key == pygame.K_RETURN:
 						print(text)
 						# print chats
-						server.send(marshal.dumps(["chat",text]))
+						text2 = str(namamu)+" : "+str(text)
+						server.send(marshal.dumps(["chat",text2]))
 						text = ''
 					elif event.key == pygame.K_BACKSPACE:
 						text = text[:-1]
