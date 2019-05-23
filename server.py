@@ -48,11 +48,11 @@ def werewolfGame():
         broadcast("afternoon", "Village at a Day, you are headed to the assembly.", '')
         time.sleep(3)
         waktu = 30
-        while waktu >0:
+        while waktu > -1:
             broadcast("chat_time",waktu,'')
-            waktu = waktu - 1
             time.sleep(1) 
-        time.sleep(60)
+            waktu = waktu - 1
+        time.sleep(3)
         # Voting Phase
         broadcast("voting", "Vote a player to execute!", '')
         time.sleep(30)

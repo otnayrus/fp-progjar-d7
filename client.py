@@ -209,9 +209,10 @@ def transisi(action=None):
 			quitgame()
 	pygame.display.update()
 	time.sleep(3)
+	eventnow[0]=" "
+	eventnow[1]=" "
 	action()
-	eventnow[0]=''
-	eventnow[1]=''
+	
 
 def your_role_f():
 	global your_role
@@ -229,14 +230,18 @@ def your_role_f():
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				quitgame()
-		pygame.display.update()
-		clock.tick(30)
 		if eventnow[0]=="afternoon":
 			your_role = False
 			transisi(chat_room_f)
+		if eventnow[0]=="voting":
+			your_role = False
+			transisi(event_vote_f)
+		pygame.display.update()
+		clock.tick(30)
 
-def event_vote():
+def event_vote_f():
 	global event_vote
+	global players
 	# players = ["player a","player b","player c"]
 	event_vote = True
 	while event_vote:
@@ -268,11 +273,6 @@ def chatRender(color, text):
 	pygame.draw.rect(gameDisplay, color, input_box, 2)
 	pygame.display.update()
 
-def dis_time():
-	global waktu
-	while waktu>0:
-		time.sleep(1)
-		waktu = waktu - 1
 
 def chat_room_f():
 	global chat_room
@@ -289,7 +289,6 @@ def chat_room_f():
 	text = ''
 	chat_room = True
 	# waktu = 30	
-	start_new_thread(dis_time,())
 	chatRender(color, text)
 	while chat_room:
 		gameDisplay.fill((30, 30, 30))
@@ -318,8 +317,8 @@ def chat_room_f():
 						text += event.unicode
 		chatRender(color, text)
 		if waktu==0:
-			your_role_f()
 			chat_room = False
+			your_role_f()
 
 def clientthread():
 	global players
@@ -339,6 +338,9 @@ def clientthread():
 		elif message[0] == 'state':
 			start = message[1]
 		elif message[0] == 'afternoon':
+			eventnow[0] = message[0]
+			eventnow[1] = message[1]
+		elif message[0] == 'voting':
 			eventnow[0] = message[0]
 			eventnow[1] = message[1]
 		elif message[0] == 'chat_time':
