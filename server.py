@@ -47,6 +47,7 @@ def werewolfGame():
     time.sleep(3)
 
     while ingame:
+        time.sleep(3)
         # Afternoon Phase
         broadcast("afternoon", "Village at a Day, you are headed to the assembly.", '')
         time.sleep(3)
@@ -88,16 +89,16 @@ def revise(arg):
         chosen = [i for i, x in enumerate(tally) if x == max(tally)]
         if len(chosen) == 1:
             # Execute and reveal
-            broadcast("execute", "The Village executed " + str(client_names[chosen[0]]) + "Turns out " + str(chosen[0]) + " is a " + str(roles[chosen[0]]), '')
-            to_client("role", "Ded", list_of_clients[chosen[0]])
+            broadcast("execute", "The Village executed " + str(client_names[chosen[0]]) + " Turns out " + str(chosen[0]) + " is a " + str(roles[chosen[0]]), '')
+            to_client("role", "Ded", list_of_clients2[chosen[0]])
             roles[chosen[0]] = "Ded"
             
     elif arg.startswith('w'):
         chosen = [i for i, x in enumerate(tally) if x == max(tally)]
         if len(chosen) == 1:
             # Execute and reveal
-            broadcast("execute", "The Werewolves kills " + str(client_names[chosen[0]]) + "Turns out " + str(chosen[0]) + " is a " + str(roles[chosen[0]]), '')
-            to_client("role", "Ded", list_of_clients[chosen[0]])            
+            broadcast("execute", "The Werewolves kills " + str(client_names[chosen[0]]) + " Turns out " + str(chosen[0]) + " is a " + str(roles[chosen[0]]), '')
+            to_client("role", "Ded", list_of_clients2[chosen[0]])            
             roles[chosen[0]] = "Ded"
 
     # Check number of werewolves left

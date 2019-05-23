@@ -260,7 +260,9 @@ def your_role_f():
 			if eventnow[0]=="seer":
 				your_role = False
 				transisi(event_vote_f,"seer")
-
+			if eventnow[0]=="execute":
+				your_role = False
+				transisi(your_role_f)
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				quitgame()			
@@ -277,7 +279,8 @@ def send_vote_f(index):
 		createText("Waiting for other player...","freesansbold.ttf",50,white,display_width/2,display_height*0.3)
 		pygame.display.update()
 		clock.tick(30)
-	your_role_f()
+	transisi(your_role_f)
+	# your_role_f()
 
 
 def event_vote_f(now):
@@ -294,14 +297,18 @@ def event_vote_f(now):
 		createText(str(waktu_vote),"freesansbold.ttf",30,white,display_width/2,display_height*0.2)
 		if now=="voting":
 			for player in players:
-				if player!='':
+				if player!='' and player != namamu:
 					draw_button(player,20,"freesansbold.ttf",white,50,height_p,100,50,dark_blue,bright_blue,send_vote_f,players.index(player))
 					height_p = height_p + 60
 		if now=="night" or now=="eat" or now=="seer" :
 			for player in players:
 				if player!='' and player != namamu:
-					draw_button(player,20,"freesansbold.ttf",white,50,height_p,100,50,dark_blue,bright_blue,send_vote_f,players.index(player))
-					height_p = height_p + 60
+					if now == "eat" :
+						draw_button(player,20,"freesansbold.ttf",white,50,height_p,100,50,dark_blue,bright_blue,send_vote_f,players.index(player))
+						height_p = height_p + 60
+					if now == "seer" :
+						draw_button(player,20,"freesansbold.ttf",white,50,height_p,100,50,dark_blue,bright_blue,send_vote_f,players.index(player))
+						height_p = height_p + 60
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				quitgame()
@@ -406,6 +413,9 @@ def clientthread():
 			eventnow[0] = message[0]
 			eventnow[1] = message[1]
 		elif message[0] == 'seer':
+			eventnow[0] = message[0]
+			eventnow[1] = message[1]
+		elif message[0] == 'execute':
 			eventnow[0] = message[0]
 			eventnow[1] = message[1]
 		elif message[0] == 'chat_time':
