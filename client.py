@@ -220,14 +220,11 @@ def transisi(action=None,arg=None):
 
 def announcement_f(arg):
 	global eventnow
-	announcement = True
-	while announcement:
-		gameDisplay.fill((30, 30, 30))
-		createText(eventnow[1],"freesansbold.ttf",20,white,display_width/2,display_height*0.1)
-		pygame.display.update()
-		clock.tick(30)
-		if eventnow[0] != arg:
-			announcement = False
+	# print eventnow
+	gameDisplay.fill((30, 30, 30))
+	createText(str(eventnow[1]),"freesansbold.ttf",20,white,display_width/2,display_height*0.1)
+	pygame.display.update()
+	time.sleep(3)
 	your_role_f()
 
 
@@ -235,7 +232,7 @@ def you_died_f():
 	youdied = True
 	while youdied:
 		gameDisplay.fill((30, 30, 30))
-		createText("You has been executed. Thanks for playing.","freesansbold.ttf",50,white,display_width/2,display_height*0.1)		
+		createText("You has been executed.","freesansbold.ttf",50,white,display_width/2,display_height*0.1)		
 		pygame.display.update()
 
 
@@ -273,9 +270,9 @@ def your_role_f():
 			if eventnow[0]=="seer":
 				your_role = False
 				transisi(event_vote_f,"seer")
-			if eventnow[0]=="seer_result":
-				your_role = False
-				transisi(announcement_f,"seer_result")
+			# if eventnow[0]=="seer_result":
+			# 	your_role = False
+			# 	transisi(announcement_f,"seer_result")
 			if eventnow[0]=="execute":
 				your_role = False
 				transisi(announcement_f, "execute")
@@ -301,8 +298,10 @@ def send_vote_f(index):
 def seer_ability_f(target):
 	global server
 	global waktu_vote
+	global eventnow
 	server.send(marshal.dumps(["seer",target]))
-	while eventnow != "seer_result":
+	
+	while eventnow[0] != "seer_result":
 		gameDisplay.fill((30, 30, 30))
 		createText("Thank you for your vote!","freesansbold.ttf",50,white,display_width/2,display_height*0.1)
 		createText("Processing result.","freesansbold.ttf",50,white,display_width/2,display_height*0.3)
@@ -450,7 +449,7 @@ def clientthread():
 			waktu_vote = message[1]
 		elif message[0] == 'chat':
 			chats.append(message[1])
-		elif message[0] == "seer_results":
+		elif message[0] == "seer_result":
 			eventnow[0] = message[0]
 			eventnow[1] = message[1]
 

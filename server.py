@@ -60,27 +60,29 @@ def werewolfGame():
         # Voting Phase
         broadcast("voting", "Vote a player to execute!", '')
         time.sleep(3)
-        waktu = 5
+        waktu = 10
         while waktu > -1:
             broadcast("vote_time",waktu,'')
             time.sleep(1) 
             waktu = waktu - 1
         revise("villager vote")
         # Night Phase
+        time.sleep(4)
+        broadcast("night", "The darkness comes, you are in your home with candle lights.", '')
+        time.sleep(4)
         for i in roles:
             if i == "werewolf":
                 to_client("eat", "You werewolf wanted to kill!", list_of_clients2[roles.index(i)])
             elif i == "seer":
                 to_client("seer", "Use your seer ability.", list_of_clients2[roles.index(i)])
-            elif i == "villager":
-                to_client("night", "The darkness comes, you are in your home with candle lights.", list_of_clients2[roles.index(i)])
-        waktu = 10
+        waktu = 30
+        time.sleep(4)
         while waktu > -1:
             broadcast("vote_time",waktu,'')
             time.sleep(1) 
             waktu = waktu - 1
         revise("werewolf vote")
-        time.sleep(3)
+        time.sleep(9)
     endgame()
         
 
