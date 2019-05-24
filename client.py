@@ -229,10 +229,15 @@ def announcement_f(arg):
 
 
 def you_died_f():
+	global youdied
+	global eventnow
 	youdied = True
 	while youdied:
 		gameDisplay.fill((30, 30, 30))
 		createText("You has been executed.","freesansbold.ttf",50,white,display_width/2,display_height*0.1)		
+		if eventnow[0]=="status":
+				youdied = False
+				endgame_f()
 		pygame.display.update()
 
 def endgame_f():
@@ -262,6 +267,9 @@ def your_role_f():
 			break
 		else:
 			createText("You are a","freesansbold.ttf",50,white,display_width/2,display_height*0.1)
+			if eventnow[0]=="status":
+				your_role = False
+				endgame_f()
 			if role != '':
 				img = "img/role-"+role+".jpg"
 				load_image(display_width*0.3,display_height*0.15,img)
@@ -286,9 +294,7 @@ def your_role_f():
 			if eventnow[0]=="execute":
 				your_role = False
 				transisi(announcement_f, "execute")
-			if eventnow[0]=="status":
-				your_role = False
-				endgame_f()
+			
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				quitgame()			
@@ -430,6 +436,8 @@ def clientthread():
 	global chats
 	global waktu_vote
 	global status
+    
+
 	while True:
 		msg = server2.recv(2048)
 		message = marshal.loads(msg)
@@ -470,9 +478,20 @@ def clientthread():
 		elif message[0] == 'status':
 			eventnow[0] = message[0]
 			eventnow[1] = message[1]
+			break
+
+# def check_status():
+# 	global eventnow
+# 	global your_role,youdied
+# 	while True:
+# 		if eventnow[0]=="status":
+# 			your_role = False
+# 			youdied=False
+# 			endgame_f()
 
 
 start_new_thread(clientthread,())
+# start_new_thread(check_status,())
 game_intro()
 pygame.quit()
 

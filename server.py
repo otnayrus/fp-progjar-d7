@@ -51,7 +51,7 @@ def werewolfGame():
         # Afternoon Phase
         broadcast("afternoon", "Village at a Day, you are headed to the assembly.", '')
         time.sleep(3)
-        waktu = 40
+        waktu = 5
         while waktu > -1:
             broadcast("chat_time",waktu,'')
             time.sleep(1) 
@@ -111,17 +111,37 @@ def revise(arg):
     slain_peeps = roles.count("Ded")
     print "roles = " + str(roles)
     print "ww left = " + str(werewolf_left)
-    if len(roles) - slain_peeps - 1 < werewolf_left :
+    print "harus : " + str(len(roles) - slain_peeps - 1)
+    if (len(roles)-1) - slain_peeps - 1 <= werewolf_left :
         # Werewolf win <<
+        print "ww win"
+        time.sleep(4)
         broadcast("status", "Werewolf won", '')
         time.sleep(1)
         ingame = False
     elif werewolf_left == 0:
         # Villager win <<
+        time.sleep(4)
         broadcast("status", "Villager won", '')
         time.sleep(1)
         ingame = False
     tallyReset()
+
+def check_status():
+    global ingame,roles
+    while True:
+
+        if len(roles) - slain_peeps - 1 < werewolf_left :
+            # Werewolf win <<
+            print "ww win"
+            time.sleep(5)
+            broadcast("status", "Werewolf won", '')
+            ingame = False
+        elif werewolf_left == 0:
+            # Villager win <<
+            time.sleep(5)
+            broadcast("status", "Villager won", '')
+            ingame = False
 
 
 def roleRandomizer():
@@ -228,6 +248,5 @@ while number_of_name > 0:
 
 ingame = True
 werewolfGame()
-server.close()
-werewolfGame()
+time.sleep(99)
 server.close()
