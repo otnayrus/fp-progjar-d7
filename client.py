@@ -25,10 +25,12 @@ executedpeeps = []
 gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption("Werewolf")
 clock = pygame.time.Clock()
+waktu = 0
+waktu_vote = 0
 
 # --------------------------------------------SOCKs-
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-IP_address = '127.0.0.1'
+IP_address = '10.151.254.77'
 Port = 8081
 server.connect((IP_address,Port))
 def send_name(name):
