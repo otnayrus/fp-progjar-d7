@@ -21,6 +21,7 @@ bright_green = (0,255,0)
 bright_blue = (0,0,210)
 role = ''
 chats =[]
+executedpeeps = []
 gameDisplay = pygame.display.set_mode((display_width, display_height))
 pygame.display.set_caption("Werewolf")
 clock = pygame.time.Clock()
@@ -334,6 +335,7 @@ def event_vote_f(now):
 	global waktu_vote
 	global eventnow
 	global namamu
+	global executedpeeps
 	event_vote = True
 	while event_vote:
 		height_p = 120
@@ -342,12 +344,12 @@ def event_vote_f(now):
 		createText(str(waktu_vote),"freesansbold.ttf",30,white,display_width/2,display_height*0.2)
 		if now=="voting":
 			for player in players:
-				if player!='' and player != namamu:
+				if player!='' and player != namamu and not any(player in s for s in executedpeeps):
 					draw_button(player,20,"freesansbold.ttf",white,50,height_p,100,50,dark_blue,bright_blue,send_vote_f,players.index(player))
 					height_p = height_p + 60
 		if now=="night" or now=="eat" or now=="seer" :
 			for player in players:
-				if player!='' and player != namamu:
+				if player!='' and player != namamu and not any(player in s for s in executedpeeps):
 					if now == "eat" :
 						draw_button(player,20,"freesansbold.ttf",white,50,height_p,100,50,dark_blue,bright_blue,send_vote_f,players.index(player))
 						height_p = height_p + 60
@@ -436,7 +438,7 @@ def clientthread():
 	global chats
 	global waktu_vote
 	global status
-    
+	global executedpeeps
 
 	while True:
 		msg = server2.recv(2048)
@@ -465,7 +467,8 @@ def clientthread():
 			eventnow[1] = message[1]
 		elif message[0] == 'execute':
 			eventnow[0] = message[0]
-			eventnow[1] = message[1]
+			eventnow[1] = message[1][0]
+			executedpeeps = message[1][1]
 		elif message[0] == 'chat_time':
 			waktu = message[1]
 		elif message[0] == 'vote_time':

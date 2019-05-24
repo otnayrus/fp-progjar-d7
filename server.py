@@ -93,7 +93,7 @@ def revise(arg):
     if arg.startswith('villager'): # villager vote
         chosen = [i for i, x in enumerate(tally) if x == max(tally)]
         if len(chosen) == 1:
-            broadcast("execute", "The Village executed " + str(client_names[chosen[0]]) + " Turns out " + str(client_names[chosen[0]]) + " is a " + str(roles[chosen[0]]), '')
+            broadcast("execute", ["The Village executed " + str(client_names[chosen[0]]) + " Turns out " + str(client_names[chosen[0]]) + " is a " + str(roles[chosen[0]]), str(client_names[chosen[0]])], '')
             time.sleep(3)
             to_client("role", "Ded", list_of_clients2[chosen[0]])
             roles[chosen[0]] = "Ded"
@@ -101,7 +101,7 @@ def revise(arg):
     elif arg.startswith('werewolf'): # werewolf vote
         chosen = [i for i, x in enumerate(tally) if x == max(tally)]
         if len(chosen) == 1:
-            broadcast("execute", "The Werewolves kills " + str(client_names[chosen[0]]) + " Turns out " + str(client_names[chosen[0]]) + " is a " + str(roles[chosen[0]]), '')
+            broadcast("execute", ["The Werewolves kills " + str(client_names[chosen[0]]) + " Turns out " + str(client_names[chosen[0]]) + " is a " + str(roles[chosen[0]]), str(client_names[chosen[0]]) ], '')
             time.sleep(3)
             to_client("role", "Ded", list_of_clients2[chosen[0]])            
             roles[chosen[0]] = "Ded"
